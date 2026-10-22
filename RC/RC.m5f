@@ -1,0 +1,108 @@
+{
+"components": [
+{
+"id": "_coretwoscreen",
+"createTime": 1792612164525,
+"name": "screen",
+"x": 0,
+"y": 0,
+"width": 320,
+"height": 240,
+"backgroundColor": "#1E1E1E",
+"backgroundImage": "",
+"size": 0,
+"screenType": "default",
+"type": "screen"
+},
+{
+"id": "____buttonA",
+"createTime": 1792612164525,
+"name": "ButtonA",
+"buttonIndex": 0,
+"x": 44,
+"y": 274,
+"width": 64,
+"height": 24,
+"text": "ButtonA",
+"visibility": false,
+"type": "button"
+},
+{
+"id": "____buttonB",
+"createTime": 1792612164525,
+"name": "ButtonB",
+"buttonIndex": 1,
+"x": 158,
+"y": 274,
+"width": 64,
+"height": 24,
+"text": "ButtonB",
+"visibility": false,
+"type": "button"
+},
+{
+"id": "____buttonC",
+"createTime": 1792612164525,
+"name": "ButtonC",
+"buttonIndex": 2,
+"x": 273,
+"y": 274,
+"width": 64,
+"height": 24,
+"text": "ButtonC",
+"visibility": false,
+"type": "button"
+}
+],
+"type": "core2",
+"versions": "Beta",
+"units": [],
+"hats": [],
+"stamps": [],
+"blockly": "<xml xmlns="https://developers.google.com/blockly/xml"><block type="basic_on_setup" id="setup_block" deletable="false" x="50" y="70">",
+"code": "from MakerAndCoder import *\nfrom MakerAndCoder_ui import *\nfrom uiflow import *\nfrom MCLab.robocar import Robocar\n\nremoteInit()\n\n# ---------------- SCREEN & HUD SETUP ----------------\n\nscreen = MCScreen()\nscreen.clean_screen()\nscreen.set_screen_bg_color(0x1E1E1E)\n\ntitle_label = MCLabel(\n    'RC COMPETITION HUD',\n    x=15, y=10,\n    color=0x00FFCC,\n    font=FONT_MONT_20,\n    parent=None\n)\n\nstatus_label = MCLabel(\n    'Status: READY',\n    x=15, y=50,\n    color=0xFFFFFF,\n    font=FONT_MONT_14,\n    parent=None\n)\n\ntelemetry_label = MCLabel(\n    'Speed: 50% | Arm: 90° | Grip: 90°',\n    x=15, y=85,\n    color=0xAAAAAA,\n    font=FONT_MONT_12,\n    parent=None\n)\n\n# ---------------- STATE MANAGEMENT ----------------\n\ncurrent_speed_setting = 50\narm_angle = 90\ngripper_angle = 90\n\n# ---------------- ROBOT INITIALIZATION ----------------\n\nrobo = Robocar()\nrobo.init_motor_module()\n\nif not robo.select_lego:\n    robo.encoder4.set_all_motors_mode(0x00)\n\ndef update_hud(status_text):\n    status_label.set_text(f"Status: {status_text}")\n    telemetry_label.set_text(f"Speed: {current_speed_setting}% | Arm: {arm_angle}° | Grip: {gripper_angle}°")\n\n# ---------------- MOTOR & DRIVE CONTROL ----------------\n\ndef MotorsStopAll():\n    robo.motor_stop(1)\n    robo.motor_stop(2)\n    robo.motor_stop(3)\n    robo.motor_stop(4)\n    update_hud("STOPPED")\n\ndef execute_drive(forward_val, turn_val):\n    speed_mult = current_speed_setting / 100.0\n    \n    if forward_val > 0:\n        power = int(forward_val * speed_mult)\n        robo.move_forward(power)\n        update_hud(f"Driving Forward ({power}%)")\n    elif forward_val < 0:\n        power = int(abs(forward_val) * speed_mult)\n        robo.move_backward(power)\n        update_hud(f"Driving Backward ({power}%)")\n    elif turn_val > 0:\n        power = int(turn_val * speed_mult)\n        robo.move_right(power)\n        update_hud(f"Turning Right ({power}%)")\n    elif turn_val < 0:\n        power = int(abs(turn_val) * speed_mult)\n        robo.move_left(power)\n        update_hud(f"Turning Left ({power}%)")\n    else:\n        MotorsStopAll()\n\n# ---------------- JOYSTICK CALLBACK ----------------\n\nDEADZONE = 10\n\ndef joystick_rcjoystick_callback(joystick_x_value, joystick_y_value):\n    x = joystick_x_value\n    y = joystick_y_value\n\n    if abs(x) < DEADZONE:\n        x = 0\n    if abs(y) < DEADZONE:\n        y = 0\n\n    if x == 0 and y == 0:\n        MotorsStopAll()\n        return\n\n    if abs(y) >= abs(x):\n        execute_drive(y, 0)\n    else:\n        execute_drive(0, x)\n\n# ---------------- SPEED SLIDER CALLBACK ----------------\n\ndef slider_bottommotor_callback(slider_value):\n    global current_speed_setting\n    current_speed_setting = int(slider_value)\n    update_hud("Speed Adjusted")\n\n# ---------------- SERVO ARM & GRIPPER CALLBACKS ----------------\n\ndef slider_maingripper_callback(slider_value):\n    global arm_angle\n    arm_angle = int(slider_value)\n    try:\n        robo.set_servo_angle(1, arm_angle)\n    except Exception as e:\n        pass\n    update_hud("Arm Adjusted")\n\ndef slider_5_callback(slider_value):\n    global gripper_angle\n    gripper_angle = int(slider_value)\n    try:\n        robo.set_servo_angle(2, gripper_angle)\n    except Exception as e:\n        pass\n    update_hud("Gripper Adjusted")\n",
+"Blockly.Remotes": [],
+"Blockly.RemotePlus": [
+{
+"id": "title",
+"blockId": "",
+"createTime": 1792612362601,
+"name": "M5RemoteTitle",
+"dragAndDrop": false,
+"resizable": false,
+"options": {
+"minWidth": 1,
+"minHeight": 1,
+"maxWidth": 6,
+"maxHeight": 10,
+"defaultWidth": 2,
+"defaultHeight": 1
+},
+"w": 2,
+"h": 1,
+"bgColor": "#2dccd3",
+"color": "#fff",
+"fontsize": "M",
+"label": "MC APP",
+"interval": 3000,
+"code": "",
+"event": "",
+"dataSource": "none",
+"ezdataToken": "yb1vEKAm0XT5YRWRCGsL2XBH52fDyxTh",
+"topic": "",
+"needShadow": false,
+"type": "title",
+"x": 0,
+"y": 0
+}
+],
+"modules": [
+"remotePlus",
+"rgb",
+"remoteplus"
+],
+"cbIdList": [],
+"eventCBIdList": [],
+"apikey": "6243B7E2",
+"uuid": "3ba6bc50-99e1-4972-bb4f-89d0aa82dd35"
+}
